@@ -120,18 +120,28 @@ spec:
             - name: DB_SSL
               value: "disable"
 
-            {{- if or .Values.secret.s3.secretRef .Values.deployment.minio.enabled }}
+            {{- if or .Values.secret.s3.keyId .Values.secret.s3.secretRef .Values.deployment.minio.enabled }}
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
+                  {{- if .Values.deployment.minio.enabled }}
                   name: {{ include "supabase.secret.minio.name" . }}
                   key: {{ include "supabase.secret.minio.key.user" . }}
+                  {{- else }}
+                  name: {{ include "supabase.secret.s3.name" . }}
+                  key: {{ include "supabase.secret.s3.key.keyId" . }}
+                  {{- end }}
 
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
+                  {{- if .Values.deployment.minio.enabled }}
                   name: {{ include "supabase.secret.minio.name" . }}
                   key: {{ include "supabase.secret.minio.key.password" . }}
+                  {{- else }}
+                  name: {{ include "supabase.secret.s3.name" . }}
+                  key: {{ include "supabase.secret.s3.key.accessKey" . }}
+                  {{- end }}
             {{- end }}
 
             {{- include "supabase.db.hostEnv" (dict "root" . "name" "DB_HOST") | nindent 12 }}
@@ -202,7 +212,6 @@ spec:
             - name: IMGPROXY_URL
               value: http://{{ include "supabase.imgproxy.fullname" . }}:{{ .Values.service.imgproxy.port | int }}
             {{- end }}
-              
             {{- if .Values.deployment.minio.enabled }}
             - name: GLOBAL_S3_ENDPOINT
               value: http://{{ include "supabase.minio.fullname" . }}:{{ default 9000 .Values.service.minio.port }}
