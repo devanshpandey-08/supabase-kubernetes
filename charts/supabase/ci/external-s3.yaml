@@ -1,0 +1,21 @@
+deployment:
+  minio:
+    enabled: false
+
+environment:
+  storage:
+    - name: STORAGE_BACKEND
+      value: s3
+    - name: STORAGE_S3_BUCKET
+      value: my-bucket
+    - name: STORAGE_S3_ENDPOINT
+      value: https://s3.example.com
+    - name: STORAGE_S3_REGION
+      value: us-east-1
+    - name: STORAGE_S3_FORCE_PATH_STYLE
+      value: "true"
+
+secret:
+  s3:
+    keyId: test-access-key-id
+    accessKey: test-secret-access-key
